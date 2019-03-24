@@ -19,10 +19,10 @@ class PYOA_Graphics():
         self._text_group = displayio.Group(max_size=1)
         self.root_group.append(self._text_group)
         self._button_group = displayio.Group(max_size=2)
-        #self.root_group.append(self._button_group)
+        self.root_group.append(self._button_group)
 
-        #self._text_font = bitmap_font.load_font("Arial-12.bdf")
-        self._text_font = displayio.BuiltinFont
+        self._text_font = bitmap_font.load_font("Arial-12.bdf")
+        #self._text_font = fontio.BuiltinFont
         try:
             glyphs = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-!,. "\'?!'
             print("Preloading font glyphs:", glyphs)
@@ -30,22 +30,19 @@ class PYOA_Graphics():
         except AttributeError:
             pass # normal for built in font
 
-        self._left_button = Button(x=10, y=195,
-                          width=120, height=40,
-                          label="Left", label_font=self._text_font,
-                          style=Button.SHADOWROUNDRECT)
-        self._right_button = Button(x=190, y=195,
-                          width=120, height=40,
-                          label="Right", label_font=self._text_font,
-                          style=Button.SHADOWROUNDRECT)
-        self._button_group.append(self._left_button.group)
-        self._button_group.append(self._right_button.group)
-
+        self._left_button = Button(x=10, y=195, width=120, height=40,
+                                   label="Left", label_font=self._text_font,
+                                   style=Button.SHADOWROUNDRECT)
+        self._right_button = Button(x=190, y=195, width=120, height=40,
+                                    label="Right", label_font=self._text_font,
+                                    style=Button.SHADOWROUNDRECT)
+        self._middle_button = Button(x=100, y=195, width=120, height=40,
+                                     label="Middle", label_font=self._text_font,
+                                     style=Button.SHADOWROUNDRECT)
 
         self._speaker_enable = DigitalInOut(board.SPEAKER_ENABLE)
         self._speaker_enable.switch_to_output(False)
         self.audio = audioio.AudioOut(board.AUDIO_OUT)
-
 
         self._background_file = None
         self._wavfile = None
@@ -53,6 +50,11 @@ class PYOA_Graphics():
         board.DISPLAY.auto_brightness = False
         self.backlight_fade(0)
         board.DISPLAY.show(self.root_group)
+
+        self.ts = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
+                                                   board.TOUCH_YD, board.TOUCH_YU,
+                                                   calibration=((5200, 59000), (5800, 57000)),
+                                                   size=(320, 240))
 
     def load_game(self, game_directory):
         self._gamedirectory = game_directory
@@ -70,12 +72,32 @@ class PYOA_Graphics():
         print("*"*32)
         print('****{:^24s}****'.format(card['page_id']))
         print("*"*32)
+
+        # turn down the lights
+        self.backlight_fade(0)
+        # turn off background so we can render the text
+        self.set_background(None, with_fade=False)
+        self.set_text(None, None)
+        for i in range(len(self._button_group)):
+            self._button_group.pop()
+
+        # display buttons
+        button01_text = card.get('button01_text', None)
+        button02_text = card.get('button02_text', None)
+        self._left_button.label = button01_text
+        self._middle_button.label = button01_text
+        self._right_button.label = button02_text
+        if button01_text and not button02_text:
+            # show only middle button
+            self._button_group.append(self._middle_button.group)
+        if button01_text and button02_text:
+            self._button_group.append(self._right_button.group)
+            self._button_group.append(self._left_button.group)
+
         # if there's a background, display it
-        self.set_background(card.get('background_image', None))
-        # if there's a sound, start playing it
-        #sound = card.get('sound', None)
-        #if sound:
-        #    self.play_sound(sound)
+        self.set_background(card.get('background_image', None), with_fade=False)
+
+        self.backlight_fade(1.0)
 
         # display main text
         text = card.get('text', None)
@@ -87,10 +109,16 @@ class PYOA_Graphics():
                 text_color = 0x0
             self.set_text(text, text_color)
 
-        # display buttons
-        button01_text = card.get('button01_text', None)
-        button02_text = card.get('button02_text', None)
+        board.DISPLAY.refresh_soon()
+        board.DISPLAY.wait_for_frame()
 
+        # if there's a sound, start playing it
+        sound = card.get('sound', None)
+        loop = card.get('sound_repeat', False)
+        if sound:
+            loop = loop == "True"
+            print("Loop:", loop)
+            self.play_sound(sound, wait_to_finish=False, loop=loop)
 
         auto_adv = card.get('auto_advance', None)
         if auto_adv is not None:
@@ -99,32 +127,60 @@ class PYOA_Graphics():
             time.sleep(auto_adv)
             return card_num+1
 
-        while True:
-            pass
-
+        goto_page = None
+        while not goto_page:
+            p = self.ts.touch_point
+            if p:
+                print("touch: ", p)
+                if self._left_button.contains(p):
+                    print("Left button")
+                    goto_page = card.get('button01_goto_page_id', None)
+                if self._right_button.contains(p):
+                    print("Right button")
+                    goto_page = card.get('button02_goto_page_id', None)
+        self.play_sound(None)  # stop playing any sounds
+        for i, c in enumerate(self._game):
+            if c.get('page_id', None) == goto_page:
+                return i    # found the matching card!
+        # eep if we got here something went wrong
+        raise RuntimeError("Could not find card with matching 'page_id': ", goto_page)
 
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
-        print("Playing sound", filename)
-        board.DISPLAY.wait_for_frame()
+        self._speaker_enable.value = False
+        self.audio.stop()
         if self._wavfile:
             self._wavfile.close()
-        self._wavfile = open(self._gamedirectory+"/"+filename, "rb")
+            self._wavfile = None
+
+        if not filename:
+            return   # nothing more to do, just stopped
+        filename = self._gamedirectory+"/"+filename
+        print("Playing sound", filename)
+        board.DISPLAY.wait_for_frame()
+        try:
+            self._wavfile = open(filename, "rb")
+        except OSError:
+            raise OSError("Could not locate sound file", filename)
+
         wavedata = audioio.WaveFile(self._wavfile)
         self._speaker_enable.value = True
-        self.audio.play(wavedata)
-        if not wait_to_finish:
+        self.audio.play(wavedata, loop=loop)
+        if loop or not wait_to_finish:
             return
         while self.audio.playing:
             pass
         self._wavfile.close()
+        self._wavfile = None
         self._speaker_enable.value = False
 
     def set_text(self, text, color):
+        if self._text_group:
+            self._text_group.pop()
+        if not text or not color:
+            return    # nothing to do!
         text = self.wrap_nicely(text, 40)
         text = '\n'.join(text)
         print("Set text to", text, "with color", hex(color))
-        if self._text_group:
-            self._text_group.pop()
         if text:
             self._text = Label(self._text_font, text=str(text))
             self._text.x = 10
@@ -151,11 +207,11 @@ class PYOA_Graphics():
             background = displayio.OnDiskBitmap(self._background_file)
             self._background_sprite = displayio.TileGrid(background,
                                                          pixel_shader=displayio.ColorConverter(),
-                                                         position=(0,0))
+                                                         x=0, y=0)
             self._background_group.append(self._background_sprite)
-        board.DISPLAY.refresh_soon()
-        board.DISPLAY.wait_for_frame()
         if with_fade:
+            board.DISPLAY.refresh_soon()
+            board.DISPLAY.wait_for_frame()
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
@@ -172,7 +228,6 @@ class PYOA_Graphics():
             board.DISPLAY.brightness = val/100
             time.sleep(0.003)
         board.DISPLAY.brightness = to_light/100
-
 
 
     # return a list of lines with wordwrapping
