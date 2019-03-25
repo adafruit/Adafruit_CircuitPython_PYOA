@@ -239,16 +239,21 @@ class PYOA_Graphics():
         :param int max_chars: The maximum number of characters on a line before wrapping.
 
         """
-        string = string.replace('\n', '').replace('\r', '') # strip confusing newlines
+        #string = string.replace('\n', '').replace('\r', '') # strip confusing newlines
         words = string.split(' ')
         the_lines = []
         the_line = ""
         for w in words:
-            if len(the_line+' '+w) <= max_chars:
-                the_line += ' '+w
-            else:
+            if '\n' in w:
+                w1, w2 = w.split('\n')
+                the_line += ' '+w1
+                the_lines.append(the_line)
+                the_line = w2
+            elif len(the_line+' '+w) > max_chars:
                 the_lines.append(the_line)
                 the_line = ''+w
+            else:
+                the_line += ' '+w
         if the_line:      # last line remaining
             the_lines.append(the_line)
         # remove first space from first line:
