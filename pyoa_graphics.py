@@ -132,12 +132,18 @@ class PYOA_Graphics():
             p = self.ts.touch_point
             if p:
                 print("touch: ", p)
-                if self._left_button.contains(p):
-                    print("Left button")
-                    goto_page = card.get('button01_goto_page_id', None)
-                if self._right_button.contains(p):
-                    print("Right button")
-                    goto_page = card.get('button02_goto_page_id', None)
+                if button01_text and not button02_text:
+                    # showing only middle button
+                    if self._middle_button.contains(p):
+                        print("Middle button")
+                        goto_page = card.get('button01_goto_page_id', None)
+                if button01_text and button02_text:
+                    if self._left_button.contains(p):
+                        print("Left button")
+                        goto_page = card.get('button01_goto_page_id', None)
+                    if self._right_button.contains(p):
+                        print("Right button")
+                        goto_page = card.get('button02_goto_page_id', None)
         self.play_sound(None)  # stop playing any sounds
         for i, c in enumerate(self._game):
             if c.get('page_id', None) == goto_page:
