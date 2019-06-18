@@ -41,7 +41,7 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 """
 
-#pylint: disable=too-many-instance-attributes,no-self-use
+#pylint: disable=too-many-instance-attributes,no-self-use,line-too-long
 
 # imports
 import time
@@ -59,6 +59,8 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
 
 class PYOA_Graphics():
+    """A choose your own adventure game framework."""
+
     def __init__(self):
         self.root_group = displayio.Group(max_size=15)
 
@@ -101,7 +103,8 @@ class PYOA_Graphics():
 
         self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
                                                             board.TOUCH_YD, board.TOUCH_YU,
-                                                            calibration=((5200, 59000), (5800, 57000)),
+                                                            calibration=((5200, 59000),
+                                                                         (5800, 57000)),
                                                             size=(320, 240))
         self._gamedirectory = None
         self._gamefilename = None
@@ -131,7 +134,7 @@ class PYOA_Graphics():
         # turn off background so we can render the text
         self.set_background(None, with_fade=False)
         self.set_text(None, None)
-        for i in range(len(self._button_group)):
+        for _ in range(len(self._button_group)):
             self._button_group.pop()
 
     def _display_buttons(self, card):
@@ -251,7 +254,7 @@ class PYOA_Graphics():
             if page_struct.get('page_id', None) == destination_page_id:
                 return page_number    # found the matching card!
         # eep if we got here something went wrong
-        raise RuntimeError("Could not find card with matching 'page_id': ", goto_page)
+        raise RuntimeError("Could not find card with matching 'page_id': ", destination_page_id)
 
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
         """Play a sound
@@ -289,6 +292,12 @@ class PYOA_Graphics():
         self._speaker_enable.value = False
 
     def set_text(self, text, color):
+        """Display the test for a card.
+
+        :param text: the text to display
+        :param color: the text color
+
+        """
         if self._text_group:
             self._text_group.pop()
         if not text or not color:
