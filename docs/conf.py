@@ -23,7 +23,7 @@ extensions = [
 autodoc_mock_imports = ["rtc", "supervisor", "pulseio", "audioio", "displayio", "neopixel",
                         "microcontroller", "adafruit_touchscreen", "adafruit_bitmap_font",
                         "adafruit_display_text", "adafruit_esp32spi", "secrets",
-                        "adafruit_sdcard", "storage", "adafruit_io"]
+                        "adafruit_sdcard", "storage", "adafruit_io", "adafruit_button"]
 
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.4', None),'CircuitPython': ('https://circuitpython.readthedocs.io/en/latest/', None)}
