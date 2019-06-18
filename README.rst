@@ -29,12 +29,7 @@ This is easily achieved by downloading
 Usage Example
 =============
 
-.. todo:: Add a quick, simple example. It and other examples should live in the examples folder and be included in docs/examples.rst.
-
 .. code-block:: python
-
-    import sys
-    sys.path.append('/Adafruit_CircuitPython_PYOA')
 
     import adafruit_sdcard
     import storage
