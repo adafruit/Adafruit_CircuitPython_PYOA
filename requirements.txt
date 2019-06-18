@@ -1,5 +1,5 @@
 Adafruit-Blinka
-adafruit_touchscreen
+adafruit-touchscreen
 adafruit-display-text
 adafruit-bitmap-font
 adafruit-button
