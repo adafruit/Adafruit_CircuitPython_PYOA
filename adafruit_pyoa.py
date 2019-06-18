@@ -33,7 +33,8 @@ Implementation Notes
 
 **Hardware:**
 
-* `PyPortal <https://www.adafruit.com/product/4116>`
+* PyPortal
+  https://www.adafruit.com/product/4116
 
 **Software and Dependencies:**
 
