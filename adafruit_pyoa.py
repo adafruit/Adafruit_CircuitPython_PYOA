@@ -41,6 +41,8 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 """
 
+#pylint: disable=too-many-instance-attributes
+
 # imports
 import time
 import os
@@ -98,10 +100,10 @@ class PYOA_Graphics():
         self.backlight_fade(0)
         board.DISPLAY.show(self.root_group)
 
-        self.ts = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
-                                                   board.TOUCH_YD, board.TOUCH_YU,
-                                                   calibration=((5200, 59000), (5800, 57000)),
-                                                   size=(320, 240))
+        self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
+                                                            board.TOUCH_YD, board.TOUCH_YU,
+                                                            calibration=((5200, 59000), (5800, 57000)),
+                                                            size=(320, 240))
 
     def load_game(self, game_directory):
         self._gamedirectory = game_directory
@@ -176,7 +178,7 @@ class PYOA_Graphics():
 
         goto_page = None
         while not goto_page:
-            p = self.ts.touch_point
+            p = self.touchscreen.touch_point
             if p:
                 print("touch: ", p)
                 if button01_text and not button02_text:
