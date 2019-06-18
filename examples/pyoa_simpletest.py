@@ -1,8 +1,8 @@
-import adafruit_sdcard
-import storage
-from pyoa_graphics import PYOA_Graphics
 import board
 import digitalio
+import adafruit_sdcard
+import storage
+from adafruit_pyoa import PYOA_Graphics
 
 try:
     sdcard = adafruit_sdcard.SDCard(board.SPI(), digitalio.DigitalInOut(board.SD_CS))
@@ -14,7 +14,7 @@ except OSError:
 
 gfx = PYOA_Graphics()
 
-gfx.load_game("/sd/robots")
+gfx.load_game("/cyoa")
 current_card = 0   # start with first card
 
 while True:

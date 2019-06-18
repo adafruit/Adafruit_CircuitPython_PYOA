@@ -1,16 +1,67 @@
+# The MIT License (MIT)
+#
+# Copyright (c) 2019 Adafruit for Adafruit Industries
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+"""
+`adafruit_pyoa`
+================================================================================
+
+A CircuitPython 'Choose Your Own Adventure' framework for PyPortal.
+
+
+* Author(s): Adafruit
+
+Implementation Notes
+--------------------
+
+**Hardware:**
+
+* PyPortal
+  https://www.adafruit.com/product/4116
+
+**Software and Dependencies:**
+
+* Adafruit CircuitPython firmware for the supported boards:
+  https://github.com/adafruit/circuitpython/releases
+"""
+
+#pylint: disable=too-many-instance-attributes,no-self-use,line-too-long
+
+# imports
 import time
-import os
 import json
 import board
-import displayio
 from digitalio import DigitalInOut
+import displayio
 import adafruit_touchscreen
 import audioio
 from adafruit_display_text.label import Label
 from adafruit_bitmap_font import bitmap_font
 from adafruit_button import Button
 
+__version__ = "0.0.0-auto.0"
+__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
+
 class PYOA_Graphics():
+    """A choose your own adventure game framework."""
+
     def __init__(self):
         self.root_group = displayio.Group(max_size=15)
 
@@ -21,7 +72,7 @@ class PYOA_Graphics():
         self._button_group = displayio.Group(max_size=2)
         self.root_group.append(self._button_group)
 
-        self._text_font = bitmap_font.load_font("Arial-12.bdf")
+        self._text_font = bitmap_font.load_font("Arial-Bold-12.bdf")
         #self._text_font = fontio.BuiltinFont
         try:
             glyphs = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-!,. "\'?!'
@@ -51,37 +102,48 @@ class PYOA_Graphics():
         self.backlight_fade(0)
         board.DISPLAY.show(self.root_group)
 
-        self.ts = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
-                                                   board.TOUCH_YD, board.TOUCH_YU,
-                                                   calibration=((5200, 59000), (5800, 57000)),
-                                                   size=(320, 240))
+        self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
+                                                            board.TOUCH_YD, board.TOUCH_YU,
+                                                            calibration=((5200, 59000),
+                                                                         (5800, 57000)),
+                                                            size=(320, 240))
+        self._gamedirectory = None
+        self._gamefilename = None
+        self._game = None
+        self._text = None
+        self._background_sprite = None
+
 
     def load_game(self, game_directory):
+        """Load a game.
+
+        :param game_directory: where the game files are stored
+
+        """
         self._gamedirectory = game_directory
-        self._gamefilename = game_directory+"/code.json"
+        self._gamefilename = game_directory+"/cyoa.json"
         try:
-            f = open(self._gamefilename, "r")
+            game_file = open(self._gamefilename, "r")
         except OSError:
             raise OSError("Could not open game file "+self._gamefilename)
-        self._game = json.load(f)
-        f.close()
+        self._game = json.load(game_file)
+        game_file.close()
 
-    def display_card(self, card_num):
-        card = self._game[card_num]
-        print(card)
-        print("*"*32)
-        print('****{:^24s}****'.format(card['page_id']))
-        print("*"*32)
-
-        # turn down the lights
+    def _fade_to_black(self):
+        """Turn down the lights."""
         self.backlight_fade(0)
         # turn off background so we can render the text
         self.set_background(None, with_fade=False)
         self.set_text(None, None)
-        for i in range(len(self._button_group)):
+        for _ in range(len(self._button_group)):
             self._button_group.pop()
 
-        # display buttons
+    def _display_buttons(self, card):
+        """Display the buttons of a card.
+
+        :param card: The active card
+
+        """
         button01_text = card.get('button01_text', None)
         button02_text = card.get('button02_text', None)
         self._left_button.label = button01_text
@@ -94,12 +156,20 @@ class PYOA_Graphics():
             self._button_group.append(self._right_button.group)
             self._button_group.append(self._left_button.group)
 
-        # if there's a background, display it
+    def _display_background_for(self, card):
+        """If there's a background on card, display it.
+
+        :param card: The active card
+
+        """
         self.set_background(card.get('background_image', None), with_fade=False)
 
-        self.backlight_fade(1.0)
+    def _display_text_for(self, card):
+        """Display the main text of a card.
 
-        # display main text
+        :param card: The active card
+
+        """
         text = card.get('text', None)
         text_color = card.get('text_color', 0x0)  # default to black
         if text:
@@ -109,16 +179,67 @@ class PYOA_Graphics():
                 text_color = 0x0
             self.set_text(text, text_color)
 
-        board.DISPLAY.refresh_soon()
-        board.DISPLAY.wait_for_frame()
+    def _play_sound_for(self, card):
+        """If there's a sound, start playing it.
 
-        # if there's a sound, start playing it
+        :param card: The active card
+
+        """
         sound = card.get('sound', None)
         loop = card.get('sound_repeat', False)
         if sound:
             loop = loop == "True"
             print("Loop:", loop)
             self.play_sound(sound, wait_to_finish=False, loop=loop)
+
+    def _wait_for_press(self, card):
+        """Wait for a button to be pressed.
+
+        :param card: The active card
+
+        Return the id of the destination page.
+        """
+        button01_text = card.get('button01_text', None)
+        button02_text = card.get('button02_text', None)
+        while True:
+            point_touched = self.touchscreen.touch_point
+            if point_touched:
+                print("touch: ", point_touched)
+                if button01_text and not button02_text:
+                    # showing only middle button
+                    if self._middle_button.contains(point_touched):
+                        print("Middle button")
+                        return card.get('button01_goto_page_id', None)
+                if button01_text and button02_text:
+                    if self._left_button.contains(point_touched):
+                        print("Left button")
+                        return card.get('button01_goto_page_id', None)
+                    if self._right_button.contains(point_touched):
+                        print("Right button")
+                        return card.get('button02_goto_page_id', None)
+
+    def display_card(self, card_num):
+        """Display and handle input on a page.
+
+        :param card_num: the index of the card to process
+
+        """
+        card = self._game[card_num]
+        print(card)
+        print("*"*32)
+        print('****{:^24s}****'.format(card['page_id']))
+        print("*"*32)
+
+        self._fade_to_black()
+        self._display_buttons(card)
+        self._display_background_for(card)
+        self.backlight_fade(1.0)
+        self._display_text_for(card)
+
+        board.DISPLAY.refresh_soon()
+        board.DISPLAY.wait_for_frame()
+
+        self._play_sound_for(card)
 
         auto_adv = card.get('auto_advance', None)
         if auto_adv is not None:
@@ -127,31 +248,23 @@ class PYOA_Graphics():
             time.sleep(auto_adv)
             return card_num+1
 
-        goto_page = None
-        while not goto_page:
-            p = self.ts.touch_point
-            if p:
-                print("touch: ", p)
-                if button01_text and not button02_text:
-                    # showing only middle button
-                    if self._middle_button.contains(p):
-                        print("Middle button")
-                        goto_page = card.get('button01_goto_page_id', None)
-                if button01_text and button02_text:
-                    if self._left_button.contains(p):
-                        print("Left button")
-                        goto_page = card.get('button01_goto_page_id', None)
-                    if self._right_button.contains(p):
-                        print("Right button")
-                        goto_page = card.get('button02_goto_page_id', None)
+        destination_page_id = self._wait_for_press(card)
+
         self.play_sound(None)  # stop playing any sounds
-        for i, c in enumerate(self._game):
-            if c.get('page_id', None) == goto_page:
-                return i    # found the matching card!
+        for page_number, page_struct in enumerate(self._game):
+            if page_struct.get('page_id', None) == destination_page_id:
+                return page_number    # found the matching card!
         # eep if we got here something went wrong
-        raise RuntimeError("Could not find card with matching 'page_id': ", goto_page)
+        raise RuntimeError("Could not find card with matching 'page_id': ", destination_page_id)
 
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
+        """Play a sound
+
+        :param filename: The filename of the sound to play
+        :param wait_to_finish: Whether playing the sound should block
+        :param loop: Whether the sound should loop
+
+        """
         self._speaker_enable.value = False
         self.audio.stop()
         if self._wavfile:
@@ -180,11 +293,17 @@ class PYOA_Graphics():
         self._speaker_enable.value = False
 
     def set_text(self, text, color):
+        """Display the test for a card.
+
+        :param text: the text to display
+        :param color: the text color
+
+        """
         if self._text_group:
             self._text_group.pop()
         if not text or not color:
             return    # nothing to do!
-        text = self.wrap_nicely(text, 40)
+        text = self.wrap_nicely(text, 37)
         text = '\n'.join(text)
         print("Set text to", text, "with color", hex(color))
         if text:
@@ -237,6 +356,7 @@ class PYOA_Graphics():
 
 
     # return a list of lines with wordwrapping
+    #pylint: disable=invalid-name
     @staticmethod
     def wrap_nicely(string, max_chars):
         """A helper that will return a list of lines with word-break wrapping.
