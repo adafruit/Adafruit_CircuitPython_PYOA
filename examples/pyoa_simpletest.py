@@ -1,8 +1,3 @@
-#pylint disable=wrong-import-position
-
-import sys
-sys.path.append('/Adafruit_CircuitPython_PYOA')
-
 import board
 import digitalio
 import adafruit_sdcard
