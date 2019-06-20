@@ -197,7 +197,7 @@ class PYOA_Graphics():
 
         :param card: The active card
 
-        Return the id of the destination page.
+        Return the id of the destination card.
         """
         button01_text = card.get('button01_text', None)
         button02_text = card.get('button02_text', None)
@@ -209,17 +209,17 @@ class PYOA_Graphics():
                     # showing only middle button
                     if self._middle_button.contains(point_touched):
                         print("Middle button")
-                        return card.get('button01_goto_page_id', None)
+                        return card.get('button01_goto_card_id', None)
                 if button01_text and button02_text:
                     if self._left_button.contains(point_touched):
                         print("Left button")
-                        return card.get('button01_goto_page_id', None)
+                        return card.get('button01_goto_card_id', None)
                     if self._right_button.contains(point_touched):
                         print("Right button")
-                        return card.get('button02_goto_page_id', None)
+                        return card.get('button02_goto_card_id', None)
 
     def display_card(self, card_num):
-        """Display and handle input on a page.
+        """Display and handle input on a card.
 
         :param card_num: the index of the card to process
 
@@ -227,7 +227,7 @@ class PYOA_Graphics():
         card = self._game[card_num]
         print(card)
         print("*"*32)
-        print('****{:^24s}****'.format(card['page_id']))
+        print('****{:^24s}****'.format(card['card_id']))
         print("*"*32)
 
         self._fade_to_black()
@@ -248,14 +248,14 @@ class PYOA_Graphics():
             time.sleep(auto_adv)
             return card_num+1
 
-        destination_page_id = self._wait_for_press(card)
+        destination_card_id = self._wait_for_press(card)
 
         self.play_sound(None)  # stop playing any sounds
-        for page_number, page_struct in enumerate(self._game):
-            if page_struct.get('page_id', None) == destination_page_id:
-                return page_number    # found the matching card!
+        for card_number, card_struct in enumerate(self._game):
+            if card_struct.get('card_id', None) == destination_card_id:
+                return card_number    # found the matching card!
         # eep if we got here something went wrong
-        raise RuntimeError("Could not find card with matching 'page_id': ", destination_page_id)
+        raise RuntimeError("Could not find card with matching 'card_id': ", destination_card_id)
 
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
         """Play a sound
