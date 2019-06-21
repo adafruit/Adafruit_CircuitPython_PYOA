@@ -134,7 +134,7 @@
     {
         "card_id": "bridge room",
         "background_image": "page01.bmp",
-        "text": "There is a creaking, rickity wooded bridge leading across a gaping chasm. At the other end is a large treasure chest. There is also a hort tunnel with daylight at the end.",
+        "text": "There is a creaking, rickity wooded bridge leading across a gaping chasm. At the other end is a large treasure chest. There is also a short tunnel with daylight at the end.",
         "text_color": "0x000001",
         "button01_text": "Treasure!",
         "button01_goto_card_id": "die",
