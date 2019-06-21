@@ -42,7 +42,7 @@
     "background_image": "page03.bmp",
     "text": "The robot is now you're friend, everyone else wishes they had a robot, this is the best thing ever. Good work!",
     "text_color": "0xFFFFFF",
-    "sound": "sound_03.wav",
+    "sound": "Mystery.wav",
     "button01_text": "Next",
     "button01_goto_card_id": "happy ending"
   },
