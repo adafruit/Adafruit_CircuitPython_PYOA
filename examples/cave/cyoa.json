@@ -10,6 +10,8 @@
     {
         "card_id": "inn",
         "background_image": "page01.bmp",
+        "sound": "pub.wav",
+        "sound_repeat": "True",
         "text": "This is a peaceful, happy inn with plentiful drink, tasty food, and friendly staff.",
         "text_color": "0x000001",
         "button01_text": "Stay here",
@@ -22,6 +24,8 @@
         "background_image": "page01.bmp",
         "text": "There is a dark cave in the hillside before you.",
         "text_color": "0x000001",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "button01_text": "Go inside",
         "button01_goto_card_id": "entry",
         "button02_text": "Run away",
@@ -30,6 +34,8 @@
     {
         "card_id": "entry",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "You are in a dark, narrow tunnel.",
         "text_color": "0x000001",
         "button01_text": "Next",
@@ -38,6 +44,8 @@
     {
         "card_id": "side opening",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "You are in a small room, one tunnel leads ahead and another to the side. Do you continue on or explore the side tunnel?",
         "text_color": "0x000001",
         "button01_text": "Continue",
@@ -48,6 +56,8 @@
     {
         "card_id": "treasure room",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There is a pile of treasure here. Congratulations!",
         "text_color": "0x000001",
         "button01_text": "Next",
@@ -56,6 +66,8 @@
     {
         "card_id": "skeleton room",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There is a skeleton on the floor. From the items around it, it seems to be that of an unfortunate adventurer.",
         "text_color": "0x000001",
         "button01_text": "Next",
@@ -64,6 +76,8 @@
     {
         "card_id": "maze 1",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -74,6 +88,8 @@
     {
         "card_id": "maze 2",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -84,6 +100,8 @@
     {
         "card_id": "maze 3",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -94,6 +112,8 @@
     {
         "card_id": "maze 4",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -104,6 +124,8 @@
     {
         "card_id": "maze 5",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -114,6 +136,8 @@
     {
         "card_id": "maze 6",
         "background_image": "page01.bmp",
+        "sound": "Mystery.wav",
+        "sound_repeat": "True",
         "text": "There are passages to the left and right.",
         "text_color": "0x000001",
         "button01_text": "Left",
@@ -124,6 +148,8 @@
     {
         "card_id": "creaking",
         "background_image": "page01.bmp",
+        "sound": "creak.wav",
+        "sound_repeat": "True",
         "text": "You hear an ominuous creaking from around the corner",
         "text_color": "0x000001",
         "button01_text": "Continue",
@@ -134,7 +160,9 @@
     {
         "card_id": "bridge room",
         "background_image": "page01.bmp",
-        "text": "There is a creaking, rickity wooded bridge leading across a gaping chasm. At the other end is a large treasure chest. There is also a hort tunnel with daylight at the end.",
+        "sound": "creak.wav",
+        "sound_repeat": "True",
+        "text": "There is a creaking, rickity wooded bridge leading across a gaping chasm. At the other end is a large treasure chest. There is also a short tunnel with daylight at the end.",
         "text_color": "0x000001",
         "button01_text": "Treasure!",
         "button01_goto_card_id": "die",
@@ -144,6 +172,7 @@
     {
         "card_id": "die",
         "background_image": "page01.bmp",
+        "sound": "scream.wav",
         "text": "The bridge gives way and you fall to a painful death.",
         "text_color": "0x000001",
         "button01_text": "Next",
