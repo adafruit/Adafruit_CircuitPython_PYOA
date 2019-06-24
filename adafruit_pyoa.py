@@ -72,25 +72,6 @@ class PYOA_Graphics():
         self._button_group = displayio.Group(max_size=2)
         self.root_group.append(self._button_group)
 
-        self._text_font = bitmap_font.load_font("Arial-Bold-12.bdf")
-        #self._text_font = fontio.BuiltinFont
-        try:
-            glyphs = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-!,. "\'?!'
-            print("Preloading font glyphs:", glyphs)
-            self._text_font.load_glyphs(glyphs)
-        except AttributeError:
-            pass # normal for built in font
-
-        self._left_button = Button(x=10, y=195, width=120, height=40,
-                                   label="Left", label_font=self._text_font,
-                                   style=Button.SHADOWROUNDRECT)
-        self._right_button = Button(x=190, y=195, width=120, height=40,
-                                    label="Right", label_font=self._text_font,
-                                    style=Button.SHADOWROUNDRECT)
-        self._middle_button = Button(x=100, y=195, width=120, height=40,
-                                     label="Middle", label_font=self._text_font,
-                                     style=Button.SHADOWROUNDRECT)
-
         self._speaker_enable = DigitalInOut(board.SPEAKER_ENABLE)
         self._speaker_enable.switch_to_output(False)
         self.audio = audioio.AudioOut(board.AUDIO_OUT)
@@ -112,6 +93,10 @@ class PYOA_Graphics():
         self._game = None
         self._text = None
         self._background_sprite = None
+        self._text_font = None
+        self._left_button = None
+        self._right_button = None
+        self._middle_button = None
 
 
     def load_game(self, game_directory):
@@ -121,6 +106,27 @@ class PYOA_Graphics():
 
         """
         self._gamedirectory = game_directory
+
+        self._text_font = bitmap_font.load_font(game_directory+"/fonts/Arial-Bold-12.bdf")
+        #self._text_font = fontio.BuiltinFont
+        try:
+            glyphs = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-!,. "\'?!'
+            print("Preloading font glyphs:", glyphs)
+            self._text_font.load_glyphs(glyphs)
+        except AttributeError:
+            pass # normal for built in font
+
+        self._left_button = Button(x=10, y=195, width=120, height=40,
+                                   label="Left", label_font=self._text_font,
+                                   style=Button.SHADOWROUNDRECT)
+        self._right_button = Button(x=190, y=195, width=120, height=40,
+                                    label="Right", label_font=self._text_font,
+                                    style=Button.SHADOWROUNDRECT)
+        self._middle_button = Button(x=100, y=195, width=120, height=40,
+                                     label="Middle", label_font=self._text_font,
+                                     style=Button.SHADOWROUNDRECT)
+
+
         self._gamefilename = game_directory+"/cyoa.json"
         try:
             game_file = open(self._gamefilename, "r")
