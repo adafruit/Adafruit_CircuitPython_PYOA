@@ -229,7 +229,7 @@ class PYOA_Graphics():
                 if self.cursor.is_clicked is True:
                     point_touched = self.mouse_cursor.x, self.mouse_cursor.y
             if point_touched is not None:
-                #print("touch: ", point_touched)
+                print("touch: ", point_touched)
                 if button01_text and not button02_text:
                     # showing only middle button
                     if self._middle_button.contains(point_touched):
