@@ -81,7 +81,7 @@ class PYOA_Graphics():
         elif hasattr(board, 'SPEAKER'):
             self.audio = audioio.AudioOut(board.SPEAKER)
         else:
-            raise AttributeError('Board does not have an Audio output!')
+            raise AttributeError('Board does not have an audio output!')
 
         self._background_file = None
         self._wavfile = None
@@ -100,7 +100,7 @@ class PYOA_Graphics():
             self.mouse_cursor = Cursor(board.DISPLAY, display_group=self.root_group, cursor_speed=8)
             self.cursor = CursorManager(self.mouse_cursor)
         else:
-            raise AttributeError('Board does not have a valid input method!')
+            raise AttributeError('PYOA requires a touchscreen or cursor.')
         self._gamedirectory = None
         self._gamefilename = None
         self._game = None
@@ -131,15 +131,15 @@ class PYOA_Graphics():
             button_y += 10
             button_width /= 2
             button_height /= 2
-            btn_right = int(btn_left+180/2)
-            btn_mid = int(btn_left+90/2)
-        self._left_button = Button(x=btn_left, y=int(button_y), width=int(button_width), height=int(button_height),
+            btn_right /= 2
+            btn_mid /= 2
+        self._left_button = Button(x=int(btn_left), y=int(button_y), width=int(button_width), height=int(button_height),
                                    label="Left", label_font=self._text_font,
                                    style=Button.SHADOWROUNDRECT)
-        self._right_button = Button(x=btn_right, y=int(button_y), width=int(button_width), height=int(button_height),
+        self._right_button = Button(x=int(btn_right), y=int(button_y), width=int(button_width), height=int(button_height),
                                     label="Right", label_font=self._text_font,
                                     style=Button.SHADOWROUNDRECT)
-        self._middle_button = Button(x=btn_mid, y=int(button_y), width=int(button_width), height=int(button_height),
+        self._middle_button = Button(x=int(btn_mid), y=int(button_y), width=int(button_width), height=int(button_height),
                                      label="Middle", label_font=self._text_font,
                                      style=Button.SHADOWROUNDRECT)
         self._gamefilename = game_directory+"/cyoa.json"
