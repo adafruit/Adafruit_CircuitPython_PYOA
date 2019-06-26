@@ -1,2 +1,2 @@
 Adafruit-Blinka
-adafruit_cursorcontrol
+adafruit-circuitpython-cursorcontrol
