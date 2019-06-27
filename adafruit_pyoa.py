@@ -51,10 +51,12 @@ import board
 from digitalio import DigitalInOut
 import displayio
 import adafruit_touchscreen
+from adafruit_cursorcontrol.cursorcontrol import Cursor
+from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 import audioio
 from adafruit_display_text.label import Label
-from adafruit_bitmap_font import bitmap_font
 from adafruit_button import Button
+import terminalio
 
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
@@ -74,7 +76,12 @@ class PYOA_Graphics():
 
         self._speaker_enable = DigitalInOut(board.SPEAKER_ENABLE)
         self._speaker_enable.switch_to_output(False)
-        self.audio = audioio.AudioOut(board.AUDIO_OUT)
+        if hasattr(board, 'AUDIO_OUT'):
+            self.audio = audioio.AudioOut(board.AUDIO_OUT)
+        elif hasattr(board, 'SPEAKER'):
+            self.audio = audioio.AudioOut(board.SPEAKER)
+        else:
+            raise AttributeError('Board does not have an audio output!')
 
         self._background_file = None
         self._wavfile = None
@@ -82,12 +89,18 @@ class PYOA_Graphics():
         board.DISPLAY.auto_brightness = False
         self.backlight_fade(0)
         board.DISPLAY.show(self.root_group)
-
-        self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
-                                                            board.TOUCH_YD, board.TOUCH_YU,
-                                                            calibration=((5200, 59000),
-                                                                         (5800, 57000)),
-                                                            size=(320, 240))
+        self.touchscreen = None
+        if hasattr(board, 'TOUCH_XL'):
+            self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
+                                                                board.TOUCH_YD, board.TOUCH_YU,
+                                                                calibration=((5200, 59000),
+                                                                             (5800, 57000)),
+                                                                size=(320, 240))
+        elif hasattr(board, 'BUTTON_CLOCK'):
+            self.mouse_cursor = Cursor(board.DISPLAY, display_group=self.root_group, cursor_speed=8)
+            self.cursor = CursorManager(self.mouse_cursor)
+        else:
+            raise AttributeError('PYOA requires a touchscreen or cursor.')
         self._gamedirectory = None
         self._gamefilename = None
         self._game = None
@@ -103,30 +116,32 @@ class PYOA_Graphics():
         """Load a game.
 
         :param game_directory: where the game files are stored
-
         """
         self._gamedirectory = game_directory
-
-        self._text_font = bitmap_font.load_font(game_directory+"/fonts/Arial-Bold-12.bdf")
-        #self._text_font = fontio.BuiltinFont
-        try:
-            glyphs = b'0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-!,. "\'?!'
-            print("Preloading font glyphs:", glyphs)
-            self._text_font.load_glyphs(glyphs)
-        except AttributeError:
-            pass # normal for built in font
-
-        self._left_button = Button(x=10, y=195, width=120, height=40,
+        self._text_font = terminalio.FONT
+        # Button Attributes
+        btn_left = 10
+        btn_right = btn_left+180
+        btn_mid = btn_left+90
+        button_y = 195
+        button_width = 120
+        button_height = 40
+        if board.DISPLAY.height < 200:
+            button_y /= 2
+            button_y += 10
+            button_width /= 2
+            button_height /= 2
+            btn_right /= 2
+            btn_mid /= 2
+        self._left_button = Button(x=int(btn_left), y=int(button_y), width=int(button_width), height=int(button_height),
                                    label="Left", label_font=self._text_font,
                                    style=Button.SHADOWROUNDRECT)
-        self._right_button = Button(x=190, y=195, width=120, height=40,
+        self._right_button = Button(x=int(btn_right), y=int(button_y), width=int(button_width), height=int(button_height),
                                     label="Right", label_font=self._text_font,
                                     style=Button.SHADOWROUNDRECT)
-        self._middle_button = Button(x=100, y=195, width=120, height=40,
+        self._middle_button = Button(x=int(btn_mid), y=int(button_y), width=int(button_width), height=int(button_height),
                                      label="Middle", label_font=self._text_font,
                                      style=Button.SHADOWROUNDRECT)
-
-
         self._gamefilename = game_directory+"/cyoa.json"
         try:
             game_file = open(self._gamefilename, "r")
@@ -137,18 +152,19 @@ class PYOA_Graphics():
 
     def _fade_to_black(self):
         """Turn down the lights."""
+        self.mouse_cursor.is_hidden = True
         self.backlight_fade(0)
         # turn off background so we can render the text
         self.set_background(None, with_fade=False)
         self.set_text(None, None)
         for _ in range(len(self._button_group)):
             self._button_group.pop()
+        self.mouse_cursor.is_hidden = False
 
     def _display_buttons(self, card):
         """Display the buttons of a card.
 
         :param card: The active card
-
         """
         button01_text = card.get('button01_text', None)
         button02_text = card.get('button02_text', None)
@@ -166,7 +182,6 @@ class PYOA_Graphics():
         """If there's a background on card, display it.
 
         :param card: The active card
-
         """
         self.set_background(card.get('background_image', None), with_fade=False)
 
@@ -174,7 +189,6 @@ class PYOA_Graphics():
         """Display the main text of a card.
 
         :param card: The active card
-
         """
         text = card.get('text', None)
         text_color = card.get('text_color', 0x0)  # default to black
@@ -189,7 +203,6 @@ class PYOA_Graphics():
         """If there's a sound, start playing it.
 
         :param card: The active card
-
         """
         sound = card.get('sound', None)
         loop = card.get('sound_repeat', False)
@@ -207,9 +220,15 @@ class PYOA_Graphics():
         """
         button01_text = card.get('button01_text', None)
         button02_text = card.get('button02_text', None)
+        point_touched = None
         while True:
-            point_touched = self.touchscreen.touch_point
-            if point_touched:
+            if self.touchscreen is not None:
+                point_touched = self.touchscreen.touch_point
+            else:
+                self.cursor.update()
+                if self.cursor.is_clicked is True:
+                    point_touched = self.mouse_cursor.x, self.mouse_cursor.y
+            if point_touched is not None:
                 print("touch: ", point_touched)
                 if button01_text and not button02_text:
                     # showing only middle button
@@ -223,12 +242,12 @@ class PYOA_Graphics():
                     if self._right_button.contains(point_touched):
                         print("Right button")
                         return card.get('button02_goto_card_id', None)
+            time.sleep(0.1)
 
     def display_card(self, card_num):
         """Display and handle input on a card.
 
         :param card_num: the index of the card to process
-
         """
         card = self._game[card_num]
         print(card)
@@ -269,7 +288,6 @@ class PYOA_Graphics():
         :param filename: The filename of the sound to play
         :param wait_to_finish: Whether playing the sound should block
         :param loop: Whether the sound should loop
-
         """
         self._speaker_enable.value = False
         self.audio.stop()
@@ -309,13 +327,21 @@ class PYOA_Graphics():
             self._text_group.pop()
         if not text or not color:
             return    # nothing to do!
-        text = self.wrap_nicely(text, 37)
+        text_wrap = 37
+        if board.DISPLAY.height < 130:
+            text_wrap = 25
+        text = self.wrap_nicely(text, text_wrap)
         text = '\n'.join(text)
         print("Set text to", text, "with color", hex(color))
+        text_x = 8
+        text_y = 95
+        if board.DISPLAY.height < 130:
+            text_y = 38
+            text_x = 3
         if text:
             self._text = Label(self._text_font, text=str(text))
-            self._text.x = 10
-            self._text.y = 100
+            self._text.x = text_x
+            self._text.y = text_y
             self._text.color = color
             self._text_group.append(self._text)
 
@@ -323,7 +349,6 @@ class PYOA_Graphics():
         """The background image to a bitmap file.
 
         :param filename: The filename of the chosen background
-
         """
         print("Set background to", filename)
         if with_fade:
