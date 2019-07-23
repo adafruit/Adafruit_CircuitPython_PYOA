@@ -96,6 +96,7 @@ class PYOA_Graphics():
         self.backlight_fade(0)
         board.DISPLAY.show(self.root_group)
         self.touchscreen = None
+        self.mouse_cursor = None
         if hasattr(board, 'TOUCH_XL'):
             self.touchscreen = adafruit_touchscreen.Touchscreen(board.TOUCH_XL, board.TOUCH_XR,
                                                                 board.TOUCH_YD, board.TOUCH_YU,
@@ -158,14 +159,16 @@ class PYOA_Graphics():
 
     def _fade_to_black(self):
         """Turn down the lights."""
-        self.mouse_cursor.is_hidden = True
+        if self.mouse_cursor:
+            self.mouse_cursor.is_hidden = True
         self.backlight_fade(0)
         # turn off background so we can render the text
         self.set_background(None, with_fade=False)
         self.set_text(None, None)
         for _ in range(len(self._button_group)):
             self._button_group.pop()
-        self.mouse_cursor.is_hidden = False
+        if self.mouse_cursor:
+            self.mouse_cursor.is_hidden = False
 
     def _display_buttons(self, card):
         """Display the buttons of a card.
