@@ -50,15 +50,9 @@ import json
 import board
 from digitalio import DigitalInOut
 import displayio
-try:
-    import adafruit_touchscreen
-except ImportError:
-    pass
-try:
-    from adafruit_cursorcontrol.cursorcontrol import Cursor
-    from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
-except ImportError:
-    pass
+import adafruit_touchscreen
+from adafruit_cursorcontrol.cursorcontrol import Cursor
+from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 import audioio
 from adafruit_display_text.label import Label
 from adafruit_button import Button
