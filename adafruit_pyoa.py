@@ -263,9 +263,11 @@ class PYOA_Graphics():
         self._display_background_for(card)
         self.backlight_fade(1.0)
         self._display_text_for(card)
-
-        board.DISPLAY.refresh_soon()
-        board.DISPLAY.wait_for_frame()
+        try:
+            board.DISPLAY.refresh(target_frames_per_second=60)
+        except AttributeError:
+            board.DISPLAY.refresh_soon()
+            board.DISPLAY.wait_for_frame()
 
         self._play_sound_for(card)
 
@@ -302,7 +304,10 @@ class PYOA_Graphics():
             return   # nothing more to do, just stopped
         filename = self._gamedirectory+"/"+filename
         print("Playing sound", filename)
-        board.DISPLAY.wait_for_frame()
+        try:
+            board.DISPLAY.refresh(target_frames_per_second=60)
+        except AttributeError:
+            board.DISPLAY.wait_for_frame()
         try:
             self._wavfile = open(filename, "rb")
         except OSError:
@@ -369,8 +374,11 @@ class PYOA_Graphics():
                                                          x=0, y=0)
             self._background_group.append(self._background_sprite)
         if with_fade:
-            board.DISPLAY.refresh_soon()
-            board.DISPLAY.wait_for_frame()
+            try:
+                board.DISPLAY.refresh(target_frames_per_second=60)
+            except AttributeError:
+                board.DISPLAY.refresh_soon()
+                board.DISPLAY.wait_for_frame()
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
