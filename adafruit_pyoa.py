@@ -51,8 +51,11 @@ import board
 from digitalio import DigitalInOut
 import displayio
 import adafruit_touchscreen
-from adafruit_cursorcontrol.cursorcontrol import Cursor
-from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
+try: # No need for Cursor Control on the PyPortal
+    from adafruit_cursorcontrol.cursorcontrol import Cursor
+    from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
+except(ImportError):
+    pass
 import audioio
 from adafruit_display_text.label import Label
 from adafruit_button import Button
@@ -66,13 +69,17 @@ class PYOA_Graphics():
 
     def __init__(self):
         self.root_group = displayio.Group(max_size=15)
-
+        self._display = board.DISPLAY
         self._background_group = displayio.Group(max_size=1)
         self.root_group.append(self._background_group)
         self._text_group = displayio.Group(max_size=1)
         self.root_group.append(self._text_group)
         self._button_group = displayio.Group(max_size=2)
         self.root_group.append(self._button_group)
+
+        if self._display.height > 250:
+            self._text_group.scale = 2
+            self._button_group.scale = 2
 
         self._speaker_enable = DigitalInOut(board.SPEAKER_ENABLE)
         self._speaker_enable.switch_to_output(False)
@@ -86,9 +93,9 @@ class PYOA_Graphics():
         self._background_file = None
         self._wavfile = None
 
-        board.DISPLAY.auto_brightness = False
+        self._display.auto_brightness = False
         self.backlight_fade(0)
-        board.DISPLAY.show(self.root_group)
+        self._display.show(self.root_group)
         self.touchscreen = None
         self.mouse_cursor = None
         if hasattr(board, 'TOUCH_XL'):
@@ -96,9 +103,10 @@ class PYOA_Graphics():
                                                                 board.TOUCH_YD, board.TOUCH_YU,
                                                                 calibration=((5200, 59000),
                                                                              (5800, 57000)),
-                                                                size=(320, 240))
+                                                                size=(self._display.width,
+                                                                      self._display.height))
         elif hasattr(board, 'BUTTON_CLOCK'):
-            self.mouse_cursor = Cursor(board.DISPLAY, display_group=self.root_group, cursor_speed=8)
+            self.mouse_cursor = Cursor(self._display, display_group=self.root_group, cursor_speed=8)
             self.cursor = CursorManager(self.mouse_cursor)
         else:
             raise AttributeError('PYOA requires a touchscreen or cursor.')
@@ -120,6 +128,12 @@ class PYOA_Graphics():
         """
         self._gamedirectory = game_directory
         self._text_font = terminalio.FONT
+        # Possible Screen Sizes are:
+        # 320x240 PyPortal and PyPortal Pynt
+        # 160x128 PyBadge and PyGamer
+        # 480x320 PyPortal Titano
+        # 240x240 if we wanted to use HalloWing M4
+
         # Button Attributes
         btn_left = 10
         btn_right = btn_left+180
@@ -127,13 +141,20 @@ class PYOA_Graphics():
         button_y = 195
         button_width = 120
         button_height = 40
-        if board.DISPLAY.height < 200:
+        if self._display.height < 200:
             button_y /= 2
             button_y += 10
             button_width /= 2
             button_height /= 2
             btn_right /= 2
             btn_mid /= 2
+        elif self._display.height > 250:
+            button_y *= .75
+            button_y -= 20
+            button_width *= .75
+            button_height *= .75
+            btn_right *= .75
+            btn_mid *= .75
         self._left_button = Button(x=int(btn_left), y=int(button_y), width=int(button_width), height=int(button_height),
                                    label="Left", label_font=self._text_font,
                                    style=Button.SHADOWROUNDRECT)
@@ -232,6 +253,8 @@ class PYOA_Graphics():
                 if self.cursor.is_clicked is True:
                     point_touched = self.mouse_cursor.x, self.mouse_cursor.y
             if point_touched is not None:
+                point_touched = (point_touched[0] // self._button_group.scale,
+                                 point_touched[1] // self._button_group.scale)
                 print("touch: ", point_touched)
                 if button01_text and not button02_text:
                     # showing only middle button
@@ -264,10 +287,10 @@ class PYOA_Graphics():
         self.backlight_fade(1.0)
         self._display_text_for(card)
         try:
-            board.DISPLAY.refresh(target_frames_per_second=60)
+            self._display.refresh(target_frames_per_second=60)
         except AttributeError:
-            board.DISPLAY.refresh_soon()
-            board.DISPLAY.wait_for_frame()
+            self._display.refresh_soon()
+            self._display.wait_for_frame()
 
         self._play_sound_for(card)
 
@@ -305,9 +328,9 @@ class PYOA_Graphics():
         filename = self._gamedirectory+"/"+filename
         print("Playing sound", filename)
         try:
-            board.DISPLAY.refresh(target_frames_per_second=60)
+            self._display.refresh(target_frames_per_second=60)
         except AttributeError:
-            board.DISPLAY.wait_for_frame()
+            self._display.wait_for_frame()
         try:
             self._wavfile = open(filename, "rb")
         except OSError:
@@ -336,16 +359,18 @@ class PYOA_Graphics():
         if not text or not color:
             return    # nothing to do!
         text_wrap = 37
-        if board.DISPLAY.height < 130:
+        if self._display.height < 130:
             text_wrap = 25
         text = self.wrap_nicely(text, text_wrap)
         text = '\n'.join(text)
         print("Set text to", text, "with color", hex(color))
         text_x = 8
         text_y = 95
-        if board.DISPLAY.height < 130:
-            text_y = 38
+        if self._display.height < 130:
             text_x = 3
+            text_y = 38
+        elif self._display.height > 250:
+            text_y = 50
         if text:
             self._text = Label(self._text_font, text=str(text))
             self._text.x = text_x
@@ -375,16 +400,16 @@ class PYOA_Graphics():
             self._background_group.append(self._background_sprite)
         if with_fade:
             try:
-                board.DISPLAY.refresh(target_frames_per_second=60)
+                self._display.refresh(target_frames_per_second=60)
             except AttributeError:
-                board.DISPLAY.refresh_soon()
-                board.DISPLAY.wait_for_frame()
+                self._display.refresh_soon()
+                self._display.wait_for_frame()
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
         """Adjust the TFT backlight. Fade from one value to another
         """
-        from_light = board.DISPLAY.brightness
+        from_light = self._display.brightness
         from_light = int(from_light*100)
         to_light = max(0, min(1.0, to_light))
         to_light = int(to_light*100)
@@ -392,9 +417,9 @@ class PYOA_Graphics():
         if from_light > to_light:
             delta = -1
         for val in range(from_light, to_light, delta):
-            board.DISPLAY.brightness = val/100
+            self._display.brightness = val/100
             time.sleep(0.003)
-        board.DISPLAY.brightness = to_light/100
+        self._display.brightness = to_light/100
 
 
     # return a list of lines with wordwrapping
