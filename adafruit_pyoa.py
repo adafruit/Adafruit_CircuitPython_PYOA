@@ -54,7 +54,7 @@ import adafruit_touchscreen
 try: # No need for Cursor Control on the PyPortal
     from adafruit_cursorcontrol.cursorcontrol import Cursor
     from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
-except(ImportError):
+except ImportError:
     pass
 import audioio
 from adafruit_display_text.label import Label
