@@ -1,24 +1,7 @@
-# The MIT License (MIT)
+# SPDX-FileCopyrightText: 2019 ladyada for Adafruit Industries
 #
-# Copyright (c) 2019 Adafruit for Adafruit Industries
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-# THE SOFTWARE.
+# SPDX-License-Identifier: MIT
+
 """
 `adafruit_pyoa`
 ================================================================================
@@ -190,8 +173,8 @@ class PYOA_Graphics:
         self._gamefilename = game_directory + "/cyoa.json"
         try:
             game_file = open(self._gamefilename, "r")
-        except OSError:
-            raise OSError("Could not open game file " + self._gamefilename)
+        except OSError as err:
+            raise OSError("Could not open game file " + self._gamefilename) from err
         self._game = json.load(game_file)
         game_file.close()
 
@@ -360,8 +343,8 @@ class PYOA_Graphics:
             self._display.wait_for_frame()
         try:
             self._wavfile = open(filename, "rb")
-        except OSError:
-            raise OSError("Could not locate sound file", filename)
+        except OSError as err:
+            raise OSError("Could not locate sound file", filename) from err
 
         wavedata = audioio.WaveFile(self._wavfile)
         self._speaker_enable.value = True
@@ -434,8 +417,7 @@ class PYOA_Graphics:
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
-        """Adjust the TFT backlight. Fade from one value to another
-        """
+        """Adjust the TFT backlight. Fade from one value to another"""
         from_light = self._display.brightness
         from_light = int(from_light * 100)
         to_light = max(0, min(1.0, to_light))
