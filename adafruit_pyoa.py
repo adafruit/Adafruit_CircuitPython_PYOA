@@ -40,6 +40,7 @@ try:  # No need for Cursor Control on the PyPortal
     from adafruit_cursorcontrol.cursorcontrol_cursormanager import CursorManager
 except ImportError:
     pass
+import audiocore
 import audioio
 from adafruit_display_text.label import Label
 from adafruit_button import Button
@@ -53,13 +54,13 @@ class PYOA_Graphics:
     """A choose your own adventure game framework."""
 
     def __init__(self):
-        self.root_group = displayio.Group(max_size=15)
+        self.root_group = displayio.Group()
         self._display = board.DISPLAY
-        self._background_group = displayio.Group(max_size=1)
+        self._background_group = displayio.Group()
         self.root_group.append(self._background_group)
-        self._text_group = displayio.Group(max_size=1)
+        self._text_group = displayio.Group()
         self.root_group.append(self._text_group)
-        self._button_group = displayio.Group(max_size=2)
+        self._button_group = displayio.Group()
         self.root_group.append(self._button_group)
 
         if self._display.height > 250:
@@ -203,10 +204,10 @@ class PYOA_Graphics:
         self._right_button.label = button02_text
         if button01_text and not button02_text:
             # show only middle button
-            self._button_group.append(self._middle_button.group)
+            self._button_group.append(self._middle_button)
         if button01_text and button02_text:
-            self._button_group.append(self._right_button.group)
-            self._button_group.append(self._left_button.group)
+            self._button_group.append(self._right_button)
+            self._button_group.append(self._left_button)
 
     def _display_background_for(self, card):
         """If there's a background on card, display it.
@@ -346,7 +347,7 @@ class PYOA_Graphics:
         except OSError as err:
             raise OSError("Could not locate sound file", filename) from err
 
-        wavedata = audioio.WaveFile(self._wavfile)
+        wavedata = audiocore.WaveFile(self._wavfile)
         self._speaker_enable.value = True
         self.audio.play(wavedata, loop=loop)
         if loop or not wait_to_finish:
