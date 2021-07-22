@@ -406,7 +406,14 @@ class PYOA_Graphics:
             self._background_file = open(self._gamedirectory + "/" + filename, "rb")
             background = displayio.OnDiskBitmap(self._background_file)
             self._background_sprite = displayio.TileGrid(
-                background, pixel_shader=displayio.ColorConverter(), x=0, y=0
+                background,
+                pixel_shader=getattr(
+                    background, "pixel_shader", displayio.ColorConverter()
+                ),
+                # TODO: Once CP6 is no longer supported, replace the above line with below
+                # pixel_shader=background.pixel_shader,
+                x=0,
+                y=0,
             )
             self._background_group.append(self._background_sprite)
         if with_fade:
