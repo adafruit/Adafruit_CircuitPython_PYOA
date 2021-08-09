@@ -16,8 +16,12 @@ Implementation Notes
 
 **Hardware:**
 
-* PyPortal
-  https://www.adafruit.com/product/4116
+* PyPortal https://www.adafruit.com/product/4116
+* PyPortal Pynt https://www.adafruit.com/product/4465
+* PyPortal Titano https://www.adafruit.com/product/4444
+* PyBadge https://www.adafruit.com/product/4200
+* PyGamer https://www.adafruit.com/product/4242
+* HalloWing M4 https://www.adafruit.com/product/4300
 
 **Software and Dependencies:**
 
