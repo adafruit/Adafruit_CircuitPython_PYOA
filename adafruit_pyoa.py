@@ -299,11 +299,7 @@ class PYOA_Graphics:
         self._display_background_for(card)
         self.backlight_fade(1.0)
         self._display_text_for(card)
-        try:
-            self._display.refresh(target_frames_per_second=60)
-        except AttributeError:
-            self._display.refresh_soon()
-            self._display.wait_for_frame()
+        self._display.refresh(target_frames_per_second=60)
 
         self._play_sound_for(card)
 
@@ -342,10 +338,7 @@ class PYOA_Graphics:
             return  # nothing more to do, just stopped
         filename = self._gamedirectory + "/" + filename
         print("Playing sound", filename)
-        try:
-            self._display.refresh(target_frames_per_second=60)
-        except AttributeError:
-            self._display.wait_for_frame()
+        self._display.refresh(target_frames_per_second=60)
         try:
             self._wavfile = open(filename, "rb")
         except OSError as err:
@@ -416,16 +409,10 @@ class PYOA_Graphics:
                 ),
                 # TODO: Once CP6 is no longer supported, replace the above line with below
                 # pixel_shader=background.pixel_shader,
-                x=0,
-                y=0,
             )
             self._background_group.append(self._background_sprite)
         if with_fade:
-            try:
-                self._display.refresh(target_frames_per_second=60)
-            except AttributeError:
-                self._display.refresh_soon()
-                self._display.wait_for_frame()
+            self._display.refresh(target_frames_per_second=60)
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
