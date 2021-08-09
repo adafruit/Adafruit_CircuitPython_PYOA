@@ -29,8 +29,6 @@ Implementation Notes
   https://github.com/adafruit/circuitpython/releases
 """
 
-# pylint: disable=too-many-instance-attributes,no-self-use,line-too-long
-
 # imports
 import time
 import json
@@ -55,6 +53,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
 
 
 class PYOA_Graphics:
+    # pylint: disable=too-many-instance-attributes
     """A choose your own adventure game framework."""
 
     def __init__(self):
@@ -438,7 +437,6 @@ class PYOA_Graphics:
         self._display.brightness = to_light / 100
 
     # return a list of lines with wordwrapping
-    # pylint: disable=invalid-name
     @staticmethod
     def wrap_nicely(string, max_chars):
         """A helper that will return a list of lines with word-break wrapping.
@@ -453,10 +451,10 @@ class PYOA_Graphics:
         the_line = ""
         for w in words:
             if "\n" in w:
-                w1, w2 = w.split("\n")
-                the_line += " " + w1
+                _w1, _w2 = w.split("\n")
+                the_line += " " + _w1
                 the_lines.append(the_line)
-                the_line = w2
+                the_line = _w2
             elif len(the_line + " " + w) > max_chars:
                 the_lines.append(the_line)
                 the_line = "" + w
