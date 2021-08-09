@@ -135,42 +135,42 @@ class PYOA_Graphics:
         button_width = 120
         button_height = 40
         if self._display.height < 200:
-            button_y /= 2
+            button_y //= 2
             button_y += 10
-            button_width /= 2
-            button_height /= 2
-            btn_right /= 2
-            btn_mid /= 2
+            button_width //= 2
+            button_height //= 2
+            btn_right //= 2
+            btn_mid //= 2
         elif self._display.height > 250:
-            button_y *= 0.75
+            button_y = (button_y * 3) // 4
             button_y -= 20
-            button_width *= 0.75
-            button_height *= 0.75
-            btn_right *= 0.75
-            btn_mid *= 0.75
+            button_width = (button_width * 3) // 4
+            button_height = (button_height * 3) // 4
+            btn_right = (btn_right * 3) // 4
+            btn_mid = (btn_right * 3) // 4
         self._left_button = Button(
-            x=int(btn_left),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_left,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Left",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
         )
         self._right_button = Button(
-            x=int(btn_right),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_right,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Right",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
         )
         self._middle_button = Button(
-            x=int(btn_mid),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_mid,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Middle",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
@@ -432,8 +432,7 @@ class PYOA_Graphics:
         """Adjust the TFT backlight. Fade from one value to another"""
         from_light = self._display.brightness
         from_light = int(from_light * 100)
-        to_light = max(0, min(1.0, to_light))
-        to_light = int(to_light * 100)
+        to_light = max(0, min(100, to_light * 100))
         delta = 1
         if from_light > to_light:
             delta = -1
