@@ -117,7 +117,7 @@ class PYOA_Graphics:
     def load_game(self, game_directory):
         """Load a game.
 
-        :param game_directory: where the game files are stored
+        :param str game_directory: where the game files are stored
         """
         self._gamedirectory = game_directory
         self._text_font = terminalio.FONT
@@ -286,7 +286,7 @@ class PYOA_Graphics:
     def display_card(self, card_num):
         """Display and handle input on a card.
 
-        :param card_num: the index of the card to process
+        :param int card_num: the index of the card to process
         """
         card = self._game[card_num]
         print(card)
@@ -324,9 +324,10 @@ class PYOA_Graphics:
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
         """Play a sound
 
-        :param filename: The filename of the sound to play
-        :param wait_to_finish: Whether playing the sound should block
-        :param loop: Whether the sound should loop
+        :param Union(None,str) filename: The filename of the sound to play. Use `None` to stop
+            playing anything.
+        :param bool wait_to_finish: Whether playing the sound should block
+        :param bool loop: Whether the sound should loop
         """
         self._speaker_enable.value = False
         self.audio.stop()
@@ -358,8 +359,8 @@ class PYOA_Graphics:
     def set_text(self, text, color):
         """Display the test for a card.
 
-        :param text: the text to display
-        :param color: the text color
+        :param Union(None,str) text: the text to display
+        :param Union(None,int) color: the text color
 
         """
         if self._text_group:
@@ -389,7 +390,9 @@ class PYOA_Graphics:
     def set_background(self, filename, *, with_fade=True):
         """The background image to a bitmap file.
 
-        :param filename: The filename of the chosen background
+        :param Union(None,str) filename: The filename of the chosen background
+        :param bool with_fade: If `True` fade out the backlight while loading the new background
+            and fade in the backlight once completed.
         """
         print("Set background to", filename)
         if with_fade:
@@ -401,6 +404,7 @@ class PYOA_Graphics:
             if self._background_file:
                 self._background_file.close()
             self._background_file = open(self._gamedirectory + "/" + filename, "rb")
+            # TODO: Once CP6 is no longer supported, pass the combined filename into OnDiskBitmap
             background = displayio.OnDiskBitmap(self._background_file)
             self._background_sprite = displayio.TileGrid(
                 background,
@@ -416,10 +420,15 @@ class PYOA_Graphics:
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
-        """Adjust the TFT backlight. Fade from one value to another"""
+        """
+        Adjust the TFT backlight. Fade from the current value to the ``to_light`` value
+
+        :param float to_light: the desired backlight brightness between :py:const:`0.0` and
+            :py:const:`1.0`.
+        """
         from_light = self._display.brightness
         from_light = int(from_light * 100)
-        to_light = max(0, min(100, to_light * 100))
+        to_light = max(0, min(100, int(to_light * 100)))
         delta = 1
         if from_light > to_light:
             delta = -1
