@@ -55,6 +55,11 @@ Usage Example
         current_card = gfx.display_card(current_card)
 
 
+Documentation
+=============
+
+API documentation for this library can be found on `Read the Docs <https://circuitpython.readthedocs.io/projects/pyoa/en/latest/>`_.
+
 Contributing
 ============
 
