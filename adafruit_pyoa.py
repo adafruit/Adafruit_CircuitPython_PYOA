@@ -173,11 +173,12 @@ class PYOA_Graphics:
         )
         self._gamefilename = game_directory + "/cyoa.json"
         try:
-            game_file = open(self._gamefilename, "r")
+            with open(  # pylint: disable=unspecified-encoding
+                self._gamefilename, "r"
+            ) as game_file:
+                self._game = json.load(game_file)
         except OSError as err:
             raise OSError("Could not open game file " + self._gamefilename) from err
-        self._game = json.load(game_file)
-        game_file.close()
 
     def _fade_to_black(self):
         """Turn down the lights."""
@@ -343,7 +344,7 @@ class PYOA_Graphics:
         except AttributeError:
             self._display.wait_for_frame()
         try:
-            self._wavfile = open(filename, "rb")
+            self._wavfile = open(filename, "rb")  # pylint: disable=consider-using-with
         except OSError as err:
             raise OSError("Could not locate sound file", filename) from err
 
@@ -403,8 +404,10 @@ class PYOA_Graphics:
         if filename:
             if self._background_file:
                 self._background_file.close()
-            self._background_file = open(self._gamedirectory + "/" + filename, "rb")
-            background = displayio.OnDiskBitmap(self._background_file)
+            with open(
+                self._gamedirectory + "/" + filename, "rb"
+            ) as self._background_file:
+                background = displayio.OnDiskBitmap(self._background_file)
             self._background_sprite = displayio.TileGrid(
                 background,
                 pixel_shader=getattr(
