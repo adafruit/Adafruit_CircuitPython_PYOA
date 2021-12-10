@@ -16,16 +16,18 @@ Implementation Notes
 
 **Hardware:**
 
-* PyPortal
-  https://www.adafruit.com/product/4116
+* PyPortal https://www.adafruit.com/product/4116
+* PyPortal Pynt https://www.adafruit.com/product/4465
+* PyPortal Titano https://www.adafruit.com/product/4444
+* PyBadge https://www.adafruit.com/product/4200
+* PyGamer https://www.adafruit.com/product/4242
+* HalloWing M4 https://www.adafruit.com/product/4300
 
 **Software and Dependencies:**
 
 * Adafruit CircuitPython firmware for the supported boards:
   https://github.com/adafruit/circuitpython/releases
 """
-
-# pylint: disable=too-many-instance-attributes,no-self-use,line-too-long
 
 # imports
 import time
@@ -51,6 +53,7 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
 
 
 class PYOA_Graphics:
+    # pylint: disable=too-many-instance-attributes
     """A choose your own adventure game framework."""
 
     def __init__(self):
@@ -113,7 +116,7 @@ class PYOA_Graphics:
     def load_game(self, game_directory):
         """Load a game.
 
-        :param game_directory: where the game files are stored
+        :param str game_directory: where the game files are stored
         """
         self._gamedirectory = game_directory
         self._text_font = terminalio.FONT
@@ -131,42 +134,42 @@ class PYOA_Graphics:
         button_width = 120
         button_height = 40
         if self._display.height < 200:
-            button_y /= 2
+            button_y //= 2
             button_y += 10
-            button_width /= 2
-            button_height /= 2
-            btn_right /= 2
-            btn_mid /= 2
+            button_width //= 2
+            button_height //= 2
+            btn_right //= 2
+            btn_mid //= 2
         elif self._display.height > 250:
-            button_y *= 0.75
+            button_y = (button_y * 3) // 4
             button_y -= 20
-            button_width *= 0.75
-            button_height *= 0.75
-            btn_right *= 0.75
-            btn_mid *= 0.75
+            button_width = (button_width * 3) // 4
+            button_height = (button_height * 3) // 4
+            btn_right = (btn_right * 3) // 4
+            btn_mid = (btn_right * 3) // 4
         self._left_button = Button(
-            x=int(btn_left),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_left,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Left",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
         )
         self._right_button = Button(
-            x=int(btn_right),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_right,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Right",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
         )
         self._middle_button = Button(
-            x=int(btn_mid),
-            y=int(button_y),
-            width=int(button_width),
-            height=int(button_height),
+            x=btn_mid,
+            y=button_y,
+            width=button_width,
+            height=button_height,
             label="Middle",
             label_font=self._text_font,
             style=Button.SHADOWROUNDRECT,
@@ -283,7 +286,7 @@ class PYOA_Graphics:
     def display_card(self, card_num):
         """Display and handle input on a card.
 
-        :param card_num: the index of the card to process
+        :param int card_num: the index of the card to process
         """
         card = self._game[card_num]
         print(card)
@@ -296,11 +299,7 @@ class PYOA_Graphics:
         self._display_background_for(card)
         self.backlight_fade(1.0)
         self._display_text_for(card)
-        try:
-            self._display.refresh(target_frames_per_second=60)
-        except AttributeError:
-            self._display.refresh_soon()
-            self._display.wait_for_frame()
+        self._display.refresh(target_frames_per_second=60)
 
         self._play_sound_for(card)
 
@@ -325,9 +324,10 @@ class PYOA_Graphics:
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
         """Play a sound
 
-        :param filename: The filename of the sound to play
-        :param wait_to_finish: Whether playing the sound should block
-        :param loop: Whether the sound should loop
+        :param Union(None,str) filename: The filename of the sound to play. Use `None` to stop
+            playing anything.
+        :param bool wait_to_finish: Whether playing the sound should block
+        :param bool loop: Whether the sound should loop
         """
         self._speaker_enable.value = False
         self.audio.stop()
@@ -339,10 +339,7 @@ class PYOA_Graphics:
             return  # nothing more to do, just stopped
         filename = self._gamedirectory + "/" + filename
         print("Playing sound", filename)
-        try:
-            self._display.refresh(target_frames_per_second=60)
-        except AttributeError:
-            self._display.wait_for_frame()
+        self._display.refresh(target_frames_per_second=60)
         try:
             self._wavfile = open(filename, "rb")  # pylint: disable=consider-using-with
         except OSError as err:
@@ -362,8 +359,8 @@ class PYOA_Graphics:
     def set_text(self, text, color):
         """Display the test for a card.
 
-        :param text: the text to display
-        :param color: the text color
+        :param Union(None,str) text: the text to display
+        :param Union(None,int) color: the text color
 
         """
         if self._text_group:
@@ -393,7 +390,9 @@ class PYOA_Graphics:
     def set_background(self, filename, *, with_fade=True):
         """The background image to a bitmap file.
 
-        :param filename: The filename of the chosen background
+        :param Union(None,str) filename: The filename of the chosen background
+        :param bool with_fade: If `True` fade out the backlight while loading the new background
+            and fade in the backlight once completed.
         """
         print("Set background to", filename)
         if with_fade:
@@ -407,32 +406,31 @@ class PYOA_Graphics:
             with open(
                 self._gamedirectory + "/" + filename, "rb"
             ) as self._background_file:
+                # TODO: Once CP6 is no longer supported, pass combined filename into OnDiskBitmap
                 background = displayio.OnDiskBitmap(self._background_file)
-            self._background_sprite = displayio.TileGrid(
-                background,
-                pixel_shader=getattr(
-                    background, "pixel_shader", displayio.ColorConverter()
-                ),
-                # TODO: Once CP6 is no longer supported, replace the above line with below
-                # pixel_shader=background.pixel_shader,
-                x=0,
-                y=0,
-            )
-            self._background_group.append(self._background_sprite)
+                self._background_sprite = displayio.TileGrid(
+                    background,
+                    pixel_shader=getattr(
+                        background, "pixel_shader", displayio.ColorConverter()
+                    ),
+                    # TODO: Once CP6 is no longer supported, replace the above line with below
+                    # pixel_shader=background.pixel_shader,
+                )
+                self._background_group.append(self._background_sprite)
         if with_fade:
-            try:
-                self._display.refresh(target_frames_per_second=60)
-            except AttributeError:
-                self._display.refresh_soon()
-                self._display.wait_for_frame()
+            self._display.refresh(target_frames_per_second=60)
             self.backlight_fade(1.0)
 
     def backlight_fade(self, to_light):
-        """Adjust the TFT backlight. Fade from one value to another"""
+        """
+        Adjust the TFT backlight. Fade from the current value to the ``to_light`` value
+
+        :param float to_light: the desired backlight brightness between :py:const:`0.0` and
+            :py:const:`1.0`.
+        """
         from_light = self._display.brightness
         from_light = int(from_light * 100)
-        to_light = max(0, min(1.0, to_light))
-        to_light = int(to_light * 100)
+        to_light = max(0, min(100, int(to_light * 100)))
         delta = 1
         if from_light > to_light:
             delta = -1
@@ -442,7 +440,6 @@ class PYOA_Graphics:
         self._display.brightness = to_light / 100
 
     # return a list of lines with wordwrapping
-    # pylint: disable=invalid-name
     @staticmethod
     def wrap_nicely(string, max_chars):
         """A helper that will return a list of lines with word-break wrapping.
@@ -457,10 +454,10 @@ class PYOA_Graphics:
         the_line = ""
         for w in words:
             if "\n" in w:
-                w1, w2 = w.split("\n")
-                the_line += " " + w1
+                _w1, _w2 = w.split("\n")
+                the_line += " " + _w1
                 the_lines.append(the_line)
-                the_line = w2
+                the_line = _w2
             elif len(the_line + " " + w) > max_chars:
                 the_lines.append(the_line)
                 the_line = "" + w
