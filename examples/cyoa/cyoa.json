@@ -21,6 +21,7 @@
     "background_image": "page01.bmp",
     "text": "You do not have any friends so you decide that it might be a good idea to build a robot friend. You're unsure if you want to do this, so now is the time to decide. Do you want to build a robot friend?",
     "text_color": "0x000001",
+    "text_background_color": "0xeeeeee",
     "sound": "sound_01.wav",
     "button01_text": "Yes",
     "button01_goto_card_id": "continue?",
