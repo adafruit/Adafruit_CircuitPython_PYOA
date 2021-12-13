@@ -227,12 +227,23 @@ class PYOA_Graphics:
         """
         text = card.get("text", None)
         text_color = card.get("text_color", 0x0)  # default to black
+        text_background_color = card.get("text_background_color", None)
         if text:
             try:
                 text_color = int(text_color)  # parse the JSON string to hex int
             except ValueError:
                 text_color = 0x0
-            self.set_text(text, text_color)
+
+            try:
+                text_background_color = int(
+                    text_background_color
+                )  # parse the JSON string to hex int
+            except ValueError:
+                text_background_color = None
+            except TypeError:
+                text_background_color = None
+
+            self.set_text(text, text_color, background_color=text_background_color)
 
     def _play_sound_for(self, card):
         """If there's a sound, start playing it.
@@ -356,7 +367,7 @@ class PYOA_Graphics:
         self._wavfile = None
         self._speaker_enable.value = False
 
-    def set_text(self, text, color):
+    def set_text(self, text, color, background_color=None):
         """Display the test for a card.
 
         :param Union(None,str) text: the text to display
@@ -385,6 +396,8 @@ class PYOA_Graphics:
             self._text.x = text_x
             self._text.y = text_y
             self._text.color = color
+            if background_color:
+                self._text.background_color = background_color
             self._text_group.append(self._text)
 
     def set_background(self, filename, *, with_fade=True):
