@@ -344,7 +344,13 @@ class PYOA_Graphics:
             "Could not find card with matching 'card_id': ", destination_card_id
         )
 
-    def play_sound(self, filename: Optional[str], *, wait_to_finish: bool = True, loop: bool = False) -> None:
+    def play_sound(
+        self,
+        filename: Optional[str],
+        *,
+        wait_to_finish: bool = True,
+        loop: bool = False
+    ) -> None:
         """Play a sound
 
         :param filename: The filename of the sound to play. Use `None` to stop
@@ -380,7 +386,12 @@ class PYOA_Graphics:
         self._wavfile = None
         self._speaker_enable.value = False
 
-    def set_text(self, text: Optional[str], color: Optional[str], background_color: Optional[int] = None) -> None:
+    def set_text(
+        self,
+        text: Optional[str],
+        color: Optional[str],
+        background_color: Optional[int] = None,
+    ) -> None:
         """Display the test for a card.
 
         :param text: the text to display
@@ -389,7 +400,6 @@ class PYOA_Graphics:
         :type color: str or None
         :param background_color: the background color of the text
         :type background_color: int or None
-
         """
         if self._text_group:
             self._text_group.pop()
@@ -417,7 +427,9 @@ class PYOA_Graphics:
                 self._text.background_color = background_color
             self._text_group.append(self._text)
 
-    def set_background(self, filename: Optional[str], *, with_fade: bool=True) -> None:
+    def set_background(
+        self, filename: Optional[str], *, with_fade: bool = True
+    ) -> None:
         """The background image to a bitmap file.
 
         :param filename: The filename of the chosen background
