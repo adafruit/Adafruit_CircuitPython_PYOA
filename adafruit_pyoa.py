@@ -200,6 +200,7 @@ class PYOA_Graphics:
         """Display the buttons of a card.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         button01_text = card.get("button01_text", None)
         button02_text = card.get("button02_text", None)
@@ -217,6 +218,7 @@ class PYOA_Graphics:
         """If there's a background on card, display it.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         self.set_background(card.get("background_image", None), with_fade=False)
 
@@ -224,6 +226,7 @@ class PYOA_Graphics:
         """Display the main text of a card.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         text = card.get("text", None)
         text_color = card.get("text_color", 0x0)  # default to black
@@ -249,6 +252,7 @@ class PYOA_Graphics:
         """If there's a sound, start playing it.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         sound = card.get("sound", None)
         loop = card.get("sound_repeat", False)
@@ -263,6 +267,7 @@ class PYOA_Graphics:
         :param card: The active card
 
         Return the id of the destination card.
+        :type card: dict(str, str)
         """
         button01_text = card.get("button01_text", None)
         button02_text = card.get("button02_text", None)
