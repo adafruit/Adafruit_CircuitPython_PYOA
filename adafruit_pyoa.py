@@ -340,8 +340,9 @@ class PYOA_Graphics:
     def play_sound(self, filename, *, wait_to_finish=True, loop=False):
         """Play a sound
 
-        :param Union(None,str) filename: The filename of the sound to play. Use `None` to stop
+        :param filename: The filename of the sound to play. Use `None` to stop
             playing anything.
+        :type filename: str or None
         :param bool wait_to_finish: Whether playing the sound should block
         :param bool loop: Whether the sound should loop
         """
@@ -375,8 +376,12 @@ class PYOA_Graphics:
     def set_text(self, text, color, background_color=None):
         """Display the test for a card.
 
-        :param Union(None,str) text: the text to display
-        :param Union(None,int) color: the text color
+        :param text: the text to display
+        :type text: str or None
+        :param color: the text color
+        :type color: str or None
+        :param background_color: the background color of the text
+        :type background_color: int or None
 
         """
         if self._text_group:
@@ -408,7 +413,8 @@ class PYOA_Graphics:
     def set_background(self, filename, *, with_fade=True):
         """The background image to a bitmap file.
 
-        :param Union(None,str) filename: The filename of the chosen background
+        :param filename: The filename of the chosen background
+        :type filename: str or None
         :param bool with_fade: If `True` fade out the backlight while loading the new background
             and fade in the backlight once completed.
         """
