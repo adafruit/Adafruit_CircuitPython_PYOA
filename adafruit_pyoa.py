@@ -265,8 +265,6 @@ class PYOA_Graphics:
         """Wait for a button to be pressed.
 
         :param card: The active card
-
-        Return the id of the destination card.
         :type card: dict(str, str)
         :return: The id of the destination card
         :rtype: str
