@@ -268,6 +268,8 @@ class PYOA_Graphics:
 
         Return the id of the destination card.
         :type card: dict(str, str)
+        :return: The id of the destination card
+        :rtype: str
         """
         button01_text = card.get("button01_text", None)
         button02_text = card.get("button02_text", None)
@@ -303,6 +305,8 @@ class PYOA_Graphics:
         """Display and handle input on a card.
 
         :param int card_num: the index of the card to process
+        :return: the card number of the selected card
+        :rtype: int
         """
         card = self._game[card_num]
         print(card)
@@ -460,7 +464,8 @@ class PYOA_Graphics:
 
         :param str string: The text to be wrapped.
         :param int max_chars: The maximum number of characters on a line before wrapping.
-
+        :return: The list of lines
+        :rtype: list(str)
         """
         # string = string.replace('\n', '').replace('\r', '') # strip confusing newlines
         words = string.split(" ")
