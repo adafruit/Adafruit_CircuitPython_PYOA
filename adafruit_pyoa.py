@@ -48,6 +48,11 @@ from adafruit_display_text.label import Label
 from adafruit_button import Button
 import terminalio
 
+try:
+    from typing import Dict, Optional, List
+except ImportError:
+    pass
+
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
 
@@ -56,7 +61,7 @@ class PYOA_Graphics:
     # pylint: disable=too-many-instance-attributes
     """A choose your own adventure game framework."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.root_group = displayio.Group()
         self._display = board.DISPLAY
         self._background_group = displayio.Group()
@@ -113,7 +118,7 @@ class PYOA_Graphics:
         self._right_button = None
         self._middle_button = None
 
-    def load_game(self, game_directory):
+    def load_game(self, game_directory: str) -> None:
         """Load a game.
 
         :param str game_directory: where the game files are stored
@@ -183,7 +188,7 @@ class PYOA_Graphics:
         except OSError as err:
             raise OSError("Could not open game file " + self._gamefilename) from err
 
-    def _fade_to_black(self):
+    def _fade_to_black(self) -> None:
         """Turn down the lights."""
         if self.mouse_cursor:
             self.mouse_cursor.is_hidden = True
@@ -196,10 +201,11 @@ class PYOA_Graphics:
         if self.mouse_cursor:
             self.mouse_cursor.is_hidden = False
 
-    def _display_buttons(self, card):
+    def _display_buttons(self, card: Dict[str, str]) -> None:
         """Display the buttons of a card.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         button01_text = card.get("button01_text", None)
         button02_text = card.get("button02_text", None)
@@ -213,17 +219,19 @@ class PYOA_Graphics:
             self._button_group.append(self._right_button)
             self._button_group.append(self._left_button)
 
-    def _display_background_for(self, card):
+    def _display_background_for(self, card: Dict[str, str]) -> None:
         """If there's a background on card, display it.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         self.set_background(card.get("background_image", None), with_fade=False)
 
-    def _display_text_for(self, card):
+    def _display_text_for(self, card: Dict[str, str]) -> None:
         """Display the main text of a card.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         text = card.get("text", None)
         text_color = card.get("text_color", 0x0)  # default to black
@@ -245,10 +253,11 @@ class PYOA_Graphics:
 
             self.set_text(text, text_color, background_color=text_background_color)
 
-    def _play_sound_for(self, card):
+    def _play_sound_for(self, card: Dict[str, str]) -> None:
         """If there's a sound, start playing it.
 
         :param card: The active card
+        :type card: dict(str, str)
         """
         sound = card.get("sound", None)
         loop = card.get("sound_repeat", False)
@@ -257,12 +266,13 @@ class PYOA_Graphics:
             print("Loop:", loop)
             self.play_sound(sound, wait_to_finish=False, loop=loop)
 
-    def _wait_for_press(self, card):
+    def _wait_for_press(self, card: Dict[str, str]) -> str:
         """Wait for a button to be pressed.
 
         :param card: The active card
-
-        Return the id of the destination card.
+        :type card: dict(str, str)
+        :return: The id of the destination card
+        :rtype: str
         """
         button01_text = card.get("button01_text", None)
         button02_text = card.get("button02_text", None)
@@ -294,10 +304,12 @@ class PYOA_Graphics:
                         return card.get("button02_goto_card_id", None)
             time.sleep(0.1)
 
-    def display_card(self, card_num):
+    def display_card(self, card_num: int) -> int:
         """Display and handle input on a card.
 
         :param int card_num: the index of the card to process
+        :return: the card number of the selected card
+        :rtype: int
         """
         card = self._game[card_num]
         print(card)
@@ -332,11 +344,18 @@ class PYOA_Graphics:
             "Could not find card with matching 'card_id': ", destination_card_id
         )
 
-    def play_sound(self, filename, *, wait_to_finish=True, loop=False):
+    def play_sound(
+        self,
+        filename: Optional[str],
+        *,
+        wait_to_finish: bool = True,
+        loop: bool = False
+    ) -> None:
         """Play a sound
 
-        :param Union(None,str) filename: The filename of the sound to play. Use `None` to stop
+        :param filename: The filename of the sound to play. Use `None` to stop
             playing anything.
+        :type filename: str or None
         :param bool wait_to_finish: Whether playing the sound should block
         :param bool loop: Whether the sound should loop
         """
@@ -367,12 +386,20 @@ class PYOA_Graphics:
         self._wavfile = None
         self._speaker_enable.value = False
 
-    def set_text(self, text, color, background_color=None):
+    def set_text(
+        self,
+        text: Optional[str],
+        color: Optional[str],
+        background_color: Optional[int] = None,
+    ) -> None:
         """Display the test for a card.
 
-        :param Union(None,str) text: the text to display
-        :param Union(None,int) color: the text color
-
+        :param text: the text to display
+        :type text: str or None
+        :param color: the text color
+        :type color: str or None
+        :param background_color: the background color of the text
+        :type background_color: int or None
         """
         if self._text_group:
             self._text_group.pop()
@@ -400,10 +427,13 @@ class PYOA_Graphics:
                 self._text.background_color = background_color
             self._text_group.append(self._text)
 
-    def set_background(self, filename, *, with_fade=True):
+    def set_background(
+        self, filename: Optional[str], *, with_fade: bool = True
+    ) -> None:
         """The background image to a bitmap file.
 
-        :param Union(None,str) filename: The filename of the chosen background
+        :param filename: The filename of the chosen background
+        :type filename: str or None
         :param bool with_fade: If `True` fade out the backlight while loading the new background
             and fade in the backlight once completed.
         """
@@ -424,7 +454,7 @@ class PYOA_Graphics:
             self._display.refresh(target_frames_per_second=60)
             self.backlight_fade(1.0)
 
-    def backlight_fade(self, to_light):
+    def backlight_fade(self, to_light: float) -> None:
         """
         Adjust the TFT backlight. Fade from the current value to the ``to_light`` value
 
@@ -444,12 +474,13 @@ class PYOA_Graphics:
 
     # return a list of lines with wordwrapping
     @staticmethod
-    def wrap_nicely(string, max_chars):
+    def wrap_nicely(string: str, max_chars: int) -> List[str]:
         """A helper that will return a list of lines with word-break wrapping.
 
         :param str string: The text to be wrapped.
         :param int max_chars: The maximum number of characters on a line before wrapping.
-
+        :return: The list of lines
+        :rtype: list(str)
         """
         # string = string.replace('\n', '').replace('\r', '') # strip confusing newlines
         words = string.split(" ")
