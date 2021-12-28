@@ -6,3 +6,4 @@ Adafruit-Blinka
 adafruit-circuitpython-display-button
 adafruit-circuitpython-display-text
 adafruit-circuitpython-touchscreen
+adafruit-circuitpython-bitmap_font
