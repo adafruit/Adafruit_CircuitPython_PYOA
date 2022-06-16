@@ -2,13 +2,22 @@
 # SPDX-License-Identifier: MIT
 
 import board
-import digitalio
-import adafruit_sdcard
 import storage
 from adafruit_pyoa import PYOA_Graphics
 
 try:
-    sdcard = adafruit_sdcard.SDCard(board.SPI(), digitalio.DigitalInOut(board.SD_CS))
+    try:
+        import sdcardio
+
+        sdcard = sdcardio.SDCard(board.SPI, board.SD_CS)
+    except ImportError:
+        import adafruit_sdcard
+        import digitalio
+
+        sdcard = adafruit_sdcard.SDCard(
+            board.SPI(),
+            digitalio.DigitalInOut(board.SD_CS),
+        )
     vfs = storage.VfsFat(sdcard)
     storage.mount(vfs, "/sd")
     print("SD card found")  # no biggie
