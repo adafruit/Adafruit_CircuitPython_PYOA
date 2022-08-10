@@ -87,7 +87,10 @@ class PYOA_Graphics:
         self._background_file = None
         self._wavfile = None
 
-        self._display.auto_brightness = False
+        try:
+            self._display.auto_brightness = False
+        except AttributeError:
+            pass
         self.backlight_fade(0)
         self._display.show(self.root_group)
         self.touchscreen = None
