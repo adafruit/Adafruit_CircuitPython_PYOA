@@ -6,6 +6,7 @@
 
 import os
 import sys
+import datetime
 
 sys.path.insert(0, os.path.abspath(".."))
 
@@ -53,7 +54,8 @@ master_doc = "index"
 
 # General information about the project.
 project = "Adafruit PYOA Library"
-copyright = "2019 Adafruit"
+current_year = str(datetime.datetime.now().year)
+copyright = current_year + " Adafruit"
 author = "Adafruit"
 
 # The version info for the project you're documenting, acts as replacement for
