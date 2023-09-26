@@ -38,6 +38,7 @@ autodoc_mock_imports = [
     "storage",
     "supervisor",
     "terminalio",
+    "bitmaptools",
 ]
 
 intersphinx_mapping = {
