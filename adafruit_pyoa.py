@@ -92,7 +92,7 @@ class PYOA_Graphics:
         except AttributeError:
             pass
         self.backlight_fade(0)
-        self._display.show(self.root_group)
+        self._display.root_group = self.root_group
         self.touchscreen = None
         self.mouse_cursor = None
         if hasattr(board, "TOUCH_XL"):
