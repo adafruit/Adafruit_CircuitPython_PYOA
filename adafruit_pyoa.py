@@ -59,7 +59,6 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_PYOA.git"
 
 
 class PYOA_Graphics:
-    # pylint: disable=too-many-instance-attributes
     """A choose your own adventure game framework."""
 
     def __init__(self) -> None:
@@ -183,9 +182,7 @@ class PYOA_Graphics:
         )
         self._gamefilename = game_directory + "/cyoa.json"
         try:
-            with open(  # pylint: disable=unspecified-encoding
-                self._gamefilename
-            ) as game_file:
+            with open(self._gamefilename) as game_file:
                 self._game = json.load(game_file)
         except OSError as err:
             raise OSError("Could not open game file " + self._gamefilename) from err
@@ -367,7 +364,7 @@ class PYOA_Graphics:
         print("Playing sound", filename)
         self._display.refresh(target_frames_per_second=60)
         try:
-            self._wavfile = open(filename, "rb")  # pylint: disable=consider-using-with
+            self._wavfile = open(filename, "rb")
         except OSError as err:
             raise OSError("Could not locate sound file", filename) from err
 
