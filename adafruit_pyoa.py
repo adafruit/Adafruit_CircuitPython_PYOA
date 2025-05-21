@@ -30,12 +30,13 @@ Implementation Notes
 """
 
 # imports
-import time
 import json
-import board
-from digitalio import DigitalInOut
-import displayio
+import time
+
 import adafruit_touchscreen
+import board
+import displayio
+from digitalio import DigitalInOut
 
 try:  # No need for Cursor Control on the PyPortal
     from adafruit_cursorcontrol.cursorcontrol import Cursor
@@ -44,12 +45,12 @@ except ImportError:
     pass
 import audiocore
 import audioio
-from adafruit_display_text.label import Label
-from adafruit_button import Button
 import terminalio
+from adafruit_button import Button
+from adafruit_display_text.label import Label
 
 try:
-    from typing import Dict, Optional, List
+    from typing import Dict, List, Optional
 except ImportError:
     pass
 
@@ -105,9 +106,7 @@ class PYOA_Graphics:
                 size=(self._display.width, self._display.height),
             )
         elif hasattr(board, "BUTTON_CLOCK"):
-            self.mouse_cursor = Cursor(
-                self._display, display_group=self.root_group, cursor_speed=8
-            )
+            self.mouse_cursor = Cursor(self._display, display_group=self.root_group, cursor_speed=8)
             self.cursor = CursorManager(self.mouse_cursor)
         else:
             raise AttributeError("PYOA requires a touchscreen or cursor.")
@@ -185,7 +184,7 @@ class PYOA_Graphics:
         self._gamefilename = game_directory + "/cyoa.json"
         try:
             with open(  # pylint: disable=unspecified-encoding
-                self._gamefilename, "r"
+                self._gamefilename
             ) as game_file:
                 self._game = json.load(game_file)
         except OSError as err:
@@ -343,16 +342,10 @@ class PYOA_Graphics:
             if card_struct.get("card_id", None) == destination_card_id:
                 return card_number  # found the matching card!
         # eep if we got here something went wrong
-        raise RuntimeError(
-            "Could not find card with matching 'card_id': ", destination_card_id
-        )
+        raise RuntimeError("Could not find card with matching 'card_id': ", destination_card_id)
 
     def play_sound(
-        self,
-        filename: Optional[str],
-        *,
-        wait_to_finish: bool = True,
-        loop: bool = False
+        self, filename: Optional[str], *, wait_to_finish: bool = True, loop: bool = False
     ) -> None:
         """Play a sound
 
@@ -430,9 +423,7 @@ class PYOA_Graphics:
                 self._text.background_color = background_color
             self._text_group.append(self._text)
 
-    def set_background(
-        self, filename: Optional[str], *, with_fade: bool = True
-    ) -> None:
+    def set_background(self, filename: Optional[str], *, with_fade: bool = True) -> None:
         """The background image to a bitmap file.
 
         :param filename: The filename of the chosen background

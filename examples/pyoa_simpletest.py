@@ -3,6 +3,7 @@
 
 import board
 import storage
+
 from adafruit_pyoa import PYOA_Graphics
 
 try:
