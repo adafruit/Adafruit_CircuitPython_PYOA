@@ -328,7 +328,7 @@ class PYOA_Graphics:
         auto_adv = card.get("auto_advance", None)
         if auto_adv is not None:
             auto_adv = float(auto_adv)
-            print("Auto advancing after %0.1f seconds" % auto_adv)
+            print(f"Auto advancing after {auto_adv:0.1f} seconds")
             time.sleep(auto_adv)
             return card_num + 1
 
